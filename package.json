@@ -1,15 +1,15 @@
 {
-  "name": "keksobooking",
+  "name": "booking",
   "version": "1.0.0",
   "private": true,
-  "description": "Личный проект «Кексобукинг» от HTML Academy",
-  "author": "Анна Крамарова",
+  "description": "booking",
+  "author": "MayaSol",
   "repository": {
     "type": "git",
-    "url": "git@github.com:htmlacademy-javascript/394887-keksobooking.git"
+    "url": "git@github.com:MS-masterbot/booking.git"
   },
   "bugs": {
-    "url": "https://github.com/htmlacademy-javascript/394887-keksobooking/issues"
+    "url": "https://github.com/MS-masterbot/booking/issues"
   },
   "devDependencies": {
     "eslint": "4.2.0",
