@@ -3,8 +3,9 @@
 
 var TITLES = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец', 'Красивый гостевой домик',
 'Некрасивый негостеприимный домик', 'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
-//var TYPES = ['flat', 'house', 'bungalo'];
+
 var TYPES = {'flat': 'Квартира', 'house': 'Дом', 'bungalo': 'Бунгало'};
+
 var FEATURES = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 
 var map = document.querySelector('.map');
@@ -15,7 +16,6 @@ function getRandom(numFrom, numTo) {
   return Math.floor( Math.random()*(numTo-numFrom+1) ) + numFrom;
 
 }
-
 
 function getAvatar(i) {
 
@@ -31,6 +31,20 @@ function getAvatar(i) {
 function getTimeString(hours) {
 
   return (hours<10 ? '0' : '') + hours + ':00';
+
+}
+
+function getFeatures( features ) {
+
+  var results = [];
+
+  for(var i=0; i < features.length; i++) {
+    if (getRandom(0,1) == 1) {
+      results.push(features[i]);
+    }
+  }
+
+  return results;
 
 }
 
@@ -57,7 +71,7 @@ var getSimilarNotices = function() {
         'guests': getRandom(1,15),
         'checkin': getTimeString(getRandom(12,14)),
         'checkout': getTimeString(getRandom(12,14)),
-        'features': FEATURES.slice(getRandom(-6,6)),
+        'features': getFeatures(FEATURES),
         'description': '',
         'photos': []
                 },
@@ -66,32 +80,38 @@ var getSimilarNotices = function() {
 
   }
 
-  console.log(results);
   return results;
 
 };
 
-function setMapPins( notices ) {
+
+function renderMapPin( notice) {
 
   var pinTemplate = document.querySelector('template').content.querySelector('.map__pin');
-  var frag = document.createDocumentFragment();
-  var elem;
-  var pinImg;
-  var pinX;
-  var pinY;
+
   var pinH = parseInt(window.getComputedStyle(pinTemplate).getPropertyValue('height'))
            + parseInt(window.getComputedStyle(pinTemplate,':after').getPropertyValue('border-top-width'));
   var pinW = parseInt(window.getComputedStyle(pinTemplate).getPropertyValue('width'));
 
+  var pinX = notice.location.x - pinW/2;
+  var pinY = notice.location.y - pinH;
+
+  var elem = pinTemplate.cloneNode(true);
+
+  elem.style.left = pinX + 'px';
+  elem.style.top = pinY + 'px';
+  elem.querySelector('img').src = notice.avatar;
+
+  return elem;
+
+}
+
+function setMapPins( notices ) {
+
+  var frag = document.createDocumentFragment();
+
   for(var i=0; i < notices.length; i++) {
-    elem = pinTemplate.cloneNode(true);
-    pinX = notices[i].location.x - pinW/2;
-    pinY = notices[i].location.y - pinH;
-    elem.style.left = pinX + 'px';
-    elem.style.top = pinY + 'px';
-    pinImg = elem.querySelector('img');
-    pinImg.src = notices[i].avatar;
-    frag.appendChild(elem);
+    frag.appendChild( renderMapPin( notices[i] ) );
   }
 
   mapPins.appendChild(frag);
@@ -102,7 +122,7 @@ function insertFirstNotice( notices ) {
 
   var noticeTemplate = document.querySelector('template').content.querySelector('article.map__card');
   var elem = noticeTemplate.cloneNode(true);
-  var n = 3;
+  var n = 0;
 
   elem.querySelector('h3').textContent = notices[n].offer.title;
   elem.querySelector('p:first-of-type small').textContent = notices[n].offer.address;
@@ -113,12 +133,13 @@ function insertFirstNotice( notices ) {
   elem.querySelector('h4 + p + p').textContent = 'Заезд после ' +  notices[n].offer.checkin +
   ' выезд до ' + notices[n].offer.checkout;
 
-  var elemLi = elem.querySelector('ul li.feature--wifi').cloneNode(true);
-  elemLi.classList.remove('feature--wifi');
+  var elemLi = elem.querySelector('ul li').cloneNode(true);
+  elemLi.classList = '';
   elem.querySelector('ul').innerHTML = '';
 
   for(var i=0; i < notices[n].offer.features.length; i++) {
     var e = elemLi.cloneNode(true);
+    e.classList.add('feature');
     e.classList.add('feature--' + notices[n].offer.features[i]);
     elem.querySelector('ul').appendChild(e);
   }
@@ -135,22 +156,6 @@ map.classList.remove('map--faded');
 var notices = getSimilarNotices();
 setMapPins(notices);
 insertFirstNotice(notices);
-
-
-
-
-function Test() {
-  var tests = Array(20);
-  tests.fill(0);
-  var n;
-
-  for(var i=0; i < 50000; i++) {
-    n = getRandom(8,13);
-    tests[n]++;
-  }
-
-  console.log(tests);
-}
 
 
 
